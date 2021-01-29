@@ -1,0 +1,33 @@
+{
+    "name": "ogecut/content-api",
+    "description": "A Laravel Nova field.",
+    "keywords": [
+        "laravel",
+        "nova"
+    ],
+    "license": "MIT",
+    "require": {
+        "php": ">=7.2.0",
+        "laravel/nova": "^3.0",
+        "optimistdigital/nova-simple-repeatable": "1.1.1",
+        "benjaminhirsch/nova-slug-field": "^1.2",
+        "whitecube/nova-flexible-content": "v0.2.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ogecut\\ContentApi\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Ogecut\\ContentApi\\FieldServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
