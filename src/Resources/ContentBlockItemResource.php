@@ -83,11 +83,9 @@ class ContentBlockItemResource extends Resource
      */
     public function fields(Request $request)
     {
-        debug($this->resource->block_id);
         parse_str(parse_url($request->headers->get('referer'), PHP_URL_QUERY), $params);
         // Хак, потомучто nova не передает GET параметры в свои компоненты
         if (!empty($this->resource->block_id)) {
-            $blockId = $this->resource->block_id;
             $block = $this->resource->block;
         } elseif (isset($params['block_id'])) {
             $blockId = $params['block_id'];
