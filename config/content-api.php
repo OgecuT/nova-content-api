@@ -22,4 +22,15 @@ return [
         Images::class => 'Images',
         Color::class => 'Color',
     ],
+    
+    'validators' => [
+        'required',
+        'string',
+        'integer',
+        'email',
+        'array',
+        'boolean',
+        'date',
+        'nullable',
+    ],
 ];

@@ -162,7 +162,7 @@ class ContentBlockResource extends Resource
                 Boolean::make('Актив.', 'visible'),
                 
                 SimpleRepeatable::make('Правила валидации', 'validators', [
-                    Text::make(__('Значения'), 'value'),
+                    Text::make(__('Значения'), 'value')->suggestions(config('content-api.validators')),
                 ]),
                 
                 Number::make('Сорт.', 'sort'),
