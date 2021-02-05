@@ -1,11 +1,9 @@
 <?php
 
-namespace Ogecut\ContentApi\Resources;
+namespace Ogecut\ContentApi\Admin\Resources;
 
 use App\Nova\Resource;
-use App\Shop\Catalog\Entities\Product\Product;
 use Exception;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\BooleanGroup;
@@ -124,31 +122,7 @@ class ContentBlockItemResource extends Resource
             
             $fields[] = Heading::make('Кастомные поля');
             foreach ($block->getFields() as $field) {
-                /** @var Field $instance */
-                $instance = forward_static_call([$field['type'], 'make'], $field['name'], "content__{$field['code']}");
-                $instance->rules($field['validators']);
-                
-                if ($field['required']) {
-                    $instance->required();
-                }
-                
-                if (!$field['show_on_index']) {
-                    $instance->hideFromIndex();
-                }
-                
-                if (!empty($field['placeholder'])) {
-                    $instance->placeholder($field['placeholder']);
-                }
-                
-                if (!empty($field['default_value'])) {
-                    $instance->default(static fn() => $field['default_value']);
-                }
-                
-                if (!empty($field['option_list']) && in_array($field['type'], [Select::class, BooleanGroup::class], true)) {
-                    $instance->options(array_combine($field['option_list'], $field['option_list']));
-                }
-                
-                $fields[] = $instance;
+                $fields[] = $this->createInstanceField($field);
             }
         }
         
@@ -211,5 +185,40 @@ class ContentBlockItemResource extends Resource
         }
         
         return parent::indexQuery($request, $query);
+    }
+    
+    /**
+     * Создает экземпляр класса Field
+     *
+     * @param $field
+     * @return Field
+     */
+    private function createInstanceField($field): Field
+    {
+        /** @var Field $instance */
+        $instance = forward_static_call([$field['type'], 'make'], $field['name'], "content__{$field['code']}");
+        $instance->rules($field['validators']);
+        
+        if ($field['required']) {
+            $instance->required();
+        }
+        
+        if (!$field['show_on_index']) {
+            $instance->hideFromIndex();
+        }
+        
+        if (!empty($field['placeholder'])) {
+            $instance->placeholder($field['placeholder']);
+        }
+        
+        if (!empty($field['default_value'])) {
+            $instance->default(static fn() => $field['default_value']);
+        }
+        
+        if (!empty($field['option_list']) && in_array($field['type'], [Select::class, BooleanGroup::class], true)) {
+            $instance->options(array_combine($field['option_list'], $field['option_list']));
+        }
+        
+        return $instance;
     }
 }

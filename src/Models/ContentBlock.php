@@ -4,6 +4,7 @@ namespace Ogecut\ContentApi\Models;
 
 use Eloquent;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -34,6 +35,25 @@ class ContentBlock extends Model implements HasMedia
         'relation' => 'array',
     ];
     protected $withCount = ['items'];
+    
+    /**
+     * Связь с элементами блока
+     */
+    public function items(): HasMany
+    {
+        return $this->hasMany(ContentBlockItem::class, 'block_id', 'id')
+            ->select(['id', 'block_id', 'name', 'content', 'relation_id', 'relation_type'])
+            ->where('visible', 1)
+            ->orderBy('sort');
+    }
+    
+    /**
+     * Связь с групой
+     */
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(ContentBlockGroup::class);
+    }
     
     public function __set($key, $value)
     {
@@ -108,17 +128,6 @@ class ContentBlock extends Model implements HasMedia
     public function getRelationField(): array
     {
         return $this->getAttribute('relation') ?? [];
-    }
-    
-    /**
-     * Связь с элементами блока
-     */
-    public function items(): HasMany
-    {
-        return $this->hasMany(ContentBlockItem::class, 'block_id', 'id')
-            ->select(['id', 'block_id', 'name', 'content', 'relation_id', 'relation_type'])
-            ->where('visible', 1)
-            ->orderBy('sort');
     }
     
     /**

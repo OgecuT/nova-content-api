@@ -1,6 +1,6 @@
 <?php
 
-namespace Ogecut\ContentApi\Resources;
+namespace Ogecut\ContentApi\Admin\Resources;
 
 use App\Nova\Resource;
 use Benjaminhirsch\NovaSlugField\Slug;
@@ -8,12 +8,14 @@ use Benjaminhirsch\NovaSlugField\TextWithSlug;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Heading;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Trix;
+use Ogecut\ContentApi\Admin\Filters\GroupFilter;
 use Ogecut\ContentApi\Models\ContentBlock;
 use OptimistDigital\NovaSimpleRepeatable\SimpleRepeatable;
 use R64\NovaFields\JSON;
@@ -69,7 +71,7 @@ class ContentBlockResource extends Resource
      */
     public static function singularLabel()
     {
-        return __('Блоки');
+        return __('Блок');
     }
     
     /**
@@ -98,6 +100,8 @@ class ContentBlockResource extends Resource
                 ->asHtml()
                 ->onlyOnIndex()
             ,
+    
+            BelongsTo::make('Группа', 'group', ContentGroupResource::class)->nullable(),
             
             // На детальной и формах
             TextWithSlug::make(__('Название блока'), 'name')
@@ -212,7 +216,9 @@ class ContentBlockResource extends Resource
      */
     public function filters(Request $request)
     {
-        return [];
+        return [
+            new GroupFilter(),
+        ];
     }
     
     /**

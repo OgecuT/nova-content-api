@@ -6,8 +6,9 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Nova\Events\ServingNova;
 use Laravel\Nova\Nova;
-use Ogecut\ContentApi\Resources\ContentBlockItemResource;
-use Ogecut\ContentApi\Resources\ContentBlockResource;
+use Ogecut\ContentApi\Admin\Resources\ContentBlockItemResource;
+use Ogecut\ContentApi\Admin\Resources\ContentBlockResource;
+use Ogecut\ContentApi\Admin\Resources\ContentGroupResource;
 
 class FieldServiceProvider extends ServiceProvider
 {
@@ -35,6 +36,7 @@ class FieldServiceProvider extends ServiceProvider
         });
         
         Nova::resources([
+            ContentGroupResource::class,
             ContentBlockResource::class,
             ContentBlockItemResource::class,
         ]);
