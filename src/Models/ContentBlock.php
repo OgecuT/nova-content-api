@@ -30,7 +30,8 @@ class ContentBlock extends Model implements HasMedia
     
     protected $table = 'content_blocks';
     protected $casts = [
-        'fields' => 'array'
+        'fields' => 'array',
+        'relation' => 'array',
     ];
     protected $withCount = ['items'];
     
@@ -104,13 +105,18 @@ class ContentBlock extends Model implements HasMedia
         return $fields;
     }
     
+    public function getRelationField(): array
+    {
+        return $this->getAttribute('relation') ?? [];
+    }
+    
     /**
      * Связь с элементами блока
      */
     public function items(): HasMany
     {
         return $this->hasMany(ContentBlockItem::class, 'block_id', 'id')
-            ->select(['id', 'block_id', 'name', 'content'])
+            ->select(['id', 'block_id', 'name', 'content', 'relation_id', 'relation_type'])
             ->where('visible', 1)
             ->orderBy('sort');
     }
@@ -137,7 +143,7 @@ class ContentBlock extends Model implements HasMedia
                 }, $item['media']);
             }
             
-            unset($item['content']);
+            unset($item['content'], $item['relation_id'], $item['relation_type']);
             return $item;
         }, $data['items']);
         

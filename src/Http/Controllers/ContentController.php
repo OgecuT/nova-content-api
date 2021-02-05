@@ -55,6 +55,17 @@ class ContentController extends Controller
             ->where('code', $code)
             ->firstOrFail();
         
+        if ($block->items->isNotEmpty()) {
+            foreach ($block->items as $item) {
+                if (!empty($item->relation_type) && !empty($item->relation_id)) {
+                    $item->setRelation(
+                        'relation',
+                        forward_static_call([$item->relation_type, 'query'])->where('id', $item->relation_id)->first()
+                    );
+                }
+            }
+        }
+        
         return new JsonResource([
             'data' => $block->getData(),
         ]);

@@ -7,6 +7,7 @@ use Benjaminhirsch\NovaSlugField\Slug;
 use Benjaminhirsch\NovaSlugField\TextWithSlug;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Heading;
 use Laravel\Nova\Fields\Number;
@@ -15,6 +16,7 @@ use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Trix;
 use Ogecut\ContentApi\Models\ContentBlock;
 use OptimistDigital\NovaSimpleRepeatable\SimpleRepeatable;
+use R64\NovaFields\JSON;
 
 
 /**
@@ -118,7 +120,7 @@ class ContentBlockResource extends Resource
             Number::make('Сортировка', 'sort')
                 ->default(1)
             ,
-    
+            
             Text::make('Кол. элементов', 'items_count')
                 ->onlyOnIndex()
             ,
@@ -167,6 +169,25 @@ class ContentBlockResource extends Resource
                 
                 Number::make('Сорт.', 'sort'),
             ])
+                ->stacked()
+            ,
+            
+            Heading::make('Связ с другими типами моделей')->asHtml(),
+            
+            JSON::make('Связь', [
+                Select::make('Тип связи', 'type')
+                    ->options(array_merge(['' => 'Нет связи'], config('content-api.relations.types_list', [])))
+                    ->displayUsingLabels()
+                ,
+                
+                Text::make('Названия поля', 'name')
+                    ->rules([Rule::requiredIf(fn() => !empty($request->input('relation.type')))])
+                ,
+                
+                Boolean::make('Обяз.', 'required'),
+                
+                Boolean::make('Активен', 'visible'),
+            ], 'relation')
                 ->stacked()
             ,
         ];

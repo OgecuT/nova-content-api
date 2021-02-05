@@ -3,7 +3,9 @@
 namespace Ogecut\ContentApi\Resources;
 
 use App\Nova\Resource;
+use App\Shop\Catalog\Entities\Product\Product;
 use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\BooleanGroup;
@@ -16,6 +18,7 @@ use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Ogecut\ContentApi\Models\ContentBlock;
 use Ogecut\ContentApi\Models\ContentBlockItem;
+use Techouse\SelectAutoComplete\SelectAutoComplete;
 
 /**
  * Class ContentBlockItemResource
@@ -83,11 +86,9 @@ class ContentBlockItemResource extends Resource
      */
     public function fields(Request $request)
     {
-        debug($this->resource->block_id);
         parse_str(parse_url($request->headers->get('referer'), PHP_URL_QUERY), $params);
         // Хак, потомучто nova не передает GET параметры в свои компоненты
         if (!empty($this->resource->block_id)) {
-            $blockId = $this->resource->block_id;
             $block = $this->resource->block;
         } elseif (isset($params['block_id'])) {
             $blockId = $params['block_id'];
@@ -101,11 +102,27 @@ class ContentBlockItemResource extends Resource
             Text::make('name')->required()->rules(['required']),
             Number::make('Сортировка', 'sort')->default(1),
             Boolean::make('Активность', 'visible'),
-            Heading::make('Кастомные поля'),
         ];
         
         if ($block) {
             $fields[] = Hidden::make('block_id')->default($block->id);
+            
+            if ($r = $block->getRelationField()) {
+                if ($r['visible'] && !empty($r['type'])) {
+                    $fields[] = Heading::make('Настройка связи');
+                    
+                    $fields[] = Hidden::make('relation_type')->default($r['type']);
+                    $fields[] = SelectAutoComplete::make($r['name'] ?? 'Связь', 'relation_id')
+                        ->options(
+                            forward_static_call([$r['type'], 'get'])->mapWithKeys(function ($t) {
+                                return [$t->id => $t->name ?? $t->title];
+                            })
+                        )
+                        ->displayUsingLabels();
+                }
+            }
+            
+            $fields[] = Heading::make('Кастомные поля');
             foreach ($block->getFields() as $field) {
                 /** @var Field $instance */
                 $instance = forward_static_call([$field['type'], 'make'], $field['name'], "content__{$field['code']}");
@@ -127,8 +144,7 @@ class ContentBlockItemResource extends Resource
                     $instance->default(static fn() => $field['default_value']);
                 }
                 
-                if (!empty($field['option_list']) && in_array($field['type'], [Select::class, BooleanGroup::class],
-                        true)) {
+                if (!empty($field['option_list']) && in_array($field['type'], [Select::class, BooleanGroup::class], true)) {
                     $instance->options(array_combine($field['option_list'], $field['option_list']));
                 }
                 

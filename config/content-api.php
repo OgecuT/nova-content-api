@@ -33,4 +33,8 @@ return [
         'date',
         'nullable',
     ],
+    
+    'relations' => [
+        'types_list' => [],
+    ],
 ];
